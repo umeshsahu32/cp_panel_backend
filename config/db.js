@@ -32,6 +32,7 @@ const pool = mysql.createPool({
   user: DBConfig.user,
   password: DBConfig.password,
   database: DBConfig.database,
+  connectTimeout: 1000000, // Increase timeout value (in milliseconds)
 });
 
 async function GetDbPool() {
