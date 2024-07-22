@@ -10,7 +10,9 @@ fn.FindUser = async (req) => {
     let input = req.body;
     let modal = JSON.parse(JSON.stringify(input));
     const [procedureQuery, errorQuery] = QueryFn.GetUser(modal);
+    console.log("procedureQuery", procedureQuery);
     const result = await db.Execute(procedureQuery, errorQuery);
+    console.log("result====>", result);
     if (result.status !== ERRORS.OK) {
       return resolve(result);
     }
@@ -33,7 +35,9 @@ fn.UserSignup = async (req) => {
     modal.otp = otp;
     modal.pwd = pwd.data;
     const [procedureQuery, errorQuery] = QueryFn.CreateUser(modal);
+    console.log("procedureQuery---->", procedureQuery);
     const result = await db.Execute(procedureQuery, errorQuery);
+    console.log("result--->", result);
     if (result.status !== ERRORS.OK) {
       return resolve(result);
     }

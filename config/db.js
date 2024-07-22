@@ -19,8 +19,11 @@
 const mysql = require("mysql2/promise");
 const { DBConfig, ERRORS } = require("./config");
 const colors = require("colors");
+const fs = require("fs");
 
 var fn = [];
+
+console.log(DBConfig);
 
 const pool = mysql.createPool({
   connectionLimit: DBConfig.connectionLimit,
@@ -41,8 +44,11 @@ async function GetDbPool() {
         console.log(individualError.message);
       }
     } else {
+      console.log(err);
       console.log("Not connected due to error: " + err.message);
     }
+
+    console.log("error#######", err);
     return { error: err, client: null };
   }
 }
@@ -51,6 +57,7 @@ fn.Execute = async (query) => {
   const { error, client } = await GetDbPool();
 
   if (error) {
+    console.log("ERROR******", error);
     return { status: ERRORS.NOT_FOUND, statusText: error.message };
   }
 

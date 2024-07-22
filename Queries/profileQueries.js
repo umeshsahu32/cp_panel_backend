@@ -3,6 +3,7 @@ const utilFn = require("../utilities/index");
 let QueryFn = [];
 
 QueryFn.CreateUserProfile = (modal) => {
+  console.log("dob--->", modal);
   return [
     `CALL cp_panel.sp_create_user_profile(
       @err,

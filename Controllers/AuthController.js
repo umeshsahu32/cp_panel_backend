@@ -77,8 +77,8 @@ fn.login = async (req) => {
 fn.signup = async (req, res) => {
   return new Promise(async (resolve) => {
     let input = req.body;
-
     let modal = JSON.parse(JSON.stringify(input));
+    console.log("Modal--->", modal);
     delete modal["password"];
 
     let resultFindUser = await helper.FindUser(req);
@@ -97,11 +97,17 @@ fn.signup = async (req, res) => {
       };
     }
 
-    return resolve({
-      ...result,
-      status: ERRORS.OK,
-      statusText: "User Created Successfully",
-    });
+    console.log("result%%%%-->", result);
+
+    if (result.status === ERRORS.OK) {
+      return resolve({
+        ...result,
+        status: ERRORS.OK,
+        statusText: "User Created Successfully",
+      });
+    } else {
+      return resolve(result);
+    }
   });
 };
 
