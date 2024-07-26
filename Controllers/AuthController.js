@@ -64,6 +64,7 @@ fn.login = async (req) => {
       email_address: userInfo[0].email_address,
       name: userInfo[0].name,
       user_id: userInfo[0].user_id,
+	  partner_id: userInfo[0].partner_id,
     };
 
     return resolve(data);
