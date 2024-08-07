@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 const { ERRORS } = require("../config/config");
 const helper = require("../utilities/userHelper");
 const utilFn = require("../utilities/index");
+const axios = require("axios");
 
 let fn = [];
 
@@ -64,7 +65,7 @@ fn.login = async (req) => {
       email_address: userInfo[0].email_address,
       name: userInfo[0].name,
       user_id: userInfo[0].user_id,
-	  partner_id: userInfo[0].partner_id,
+      partner_id: userInfo[0].partner_id,
     };
 
     return resolve(data);
@@ -79,7 +80,6 @@ fn.signup = async (req, res) => {
   return new Promise(async (resolve) => {
     let input = req.body;
     let modal = JSON.parse(JSON.stringify(input));
-    console.log("Modal--->", modal);
     delete modal["password"];
 
     let resultFindUser = await helper.FindUser(req);
@@ -97,8 +97,6 @@ fn.signup = async (req, res) => {
         statusText: "Email address already exist",
       };
     }
-
-    console.log("result%%%%-->", result);
 
     if (result.status === ERRORS.OK) {
       return resolve({
@@ -249,6 +247,85 @@ fn.resetPassword = async (req, res) => {
           statusText: "Server Error. Try Again Later",
         });
       }
+    }
+  });
+};
+
+fn.CreateTokenAndZohoSignup = async (req, res) => {
+  return new Promise(async (resolve) => {
+    const name = req.body.name;
+    const phone = req.body.phone;
+
+    const formData = new URLSearchParams();
+    formData.append("client_id", "1000.W3ROG3LF0L8H6ZGG546FFWHF9FRR9M");
+    formData.append(
+      "client_secret",
+      "c73cc0c3a2b8cde108b278428b3e8d505a404624e9"
+    );
+    formData.append(
+      "refresh_token",
+      "1000.1fdc1c1f76edbcf9d81d28a1170a484c.4dbe0fc73560b1e032c4369918564b2c"
+    );
+    formData.append("grant_type", "refresh_token");
+
+    const config = {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    };
+
+    const response = await axios.post(
+      "https://accounts.zoho.com/oauth/v2/token",
+      formData,
+      config
+    );
+    console.log("Response Data---->>>>", response.data.access_token);
+
+    const result = await axios.post(
+      "https://www.zohoapis.com/crm/v2/Partners",
+      {
+        data: [
+          {
+            Name: name,
+            Mobile: phone,
+          },
+        ],
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${response.data.access_token}`,
+        },
+      }
+    );
+
+    console.log("result--------->>>>2", result.data);
+    console.log("result--------->>>>3", result.data.data[0].details.id);
+
+    const resultGetPartner_id = await axios.get(
+      `https://www.zohoapis.com/crm/v2/Partners/${result.data.data[0].details.id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${response.data.access_token}`,
+        },
+      }
+    );
+
+    console.log(
+      "resultGetPartner_id",
+      resultGetPartner_id.data.data[0].Partner_ID,
+      resultGetPartner_id.data.data[0]
+    );
+
+    if (result.status === 201) {
+      return resolve({
+        status: ERRORS.OK,
+        partner_id: resultGetPartner_id.data.data[0].Partner_ID,
+      });
+    } else {
+      resolve({
+        status: ERRORS.INTERNAL_SERVER_ERROR,
+        statusText: "Server Error. Try Again Later",
+      });
     }
   });
 };

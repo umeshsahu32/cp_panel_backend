@@ -63,4 +63,10 @@ router.put("/reset-password", otpValidation, async function (req, res, next) {
   res.send(result);
 });
 
+router.post("/createTokenAndZohoSignup", async function (req, res, next) {
+  const result = await controller.CreateTokenAndZohoSignup(req);
+  console.log("Result------>", result);
+  res.send(result);
+});
+
 module.exports = router;
